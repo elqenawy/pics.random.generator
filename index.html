@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111318">
+  <title>Random Photo Finder</title>
+  <style>
+    :root {
+      --bg: #111318;
+      --surface: #191c23;
+      --surface-raised: #20242d;
+      --text: #f5f6f8;
+      --muted: #a3aab8;
+      --line: #303643;
+      --accent: #b6f36a;
+      --accent-text: #16200c;
+      --warning: #ffcc8a;
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 78% 0%, #242b25 0, transparent 38%), var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1100px, calc(100% - 36px)); margin: 0 auto; padding: 28px 0 46px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 64px; }
+    .brand { display: flex; gap: 12px; align-items: center; font-weight: 750; letter-spacing: -.03em; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); border-radius: 12px; }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .top-note { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .top-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+    .hero { max-width: 760px; margin-bottom: 35px; }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; color: var(--accent); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; font-weight: 800; margin-bottom: 18px; }
+    h1 { font-size: clamp(42px, 7.3vw, 76px); letter-spacing: -.075em; line-height: .99; margin: 0; max-width: 780px; }
+    h1 span { color: var(--accent); }
+    .intro { max-width: 590px; color: var(--muted); font-size: 16px; line-height: 1.65; margin: 22px 0 0; }
+    .workspace { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 18px; align-items: stretch; }
+    .panel { border: 1px solid var(--line); background: rgba(25, 28, 35, .9); border-radius: var(--radius); padding: 25px; min-width: 0; }
+    .section-label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; margin-bottom: 23px; }
+    .step { color: #697181; font-variant-numeric: tabular-nums; }
+    label { display: block; font-weight: 650; font-size: 14px; margin-bottom: 10px; }
+    .input-wrap { display: flex; align-items: center; gap: 10px; border: 1px solid #424a59; background: #11141a; border-radius: 13px; padding: 0 14px; transition: border .18s, box-shadow .18s; }
+    .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px #b6f36a1f; }
+    .input-wrap svg { flex: 0 0 auto; color: #8e98a8; }
+    input { width: 100%; min-width: 0; color: var(--text); border: 0; outline: 0; background: transparent; padding: 15px 0; font-size: 14px; }
+    input::placeholder { color: #667080; }
+    .hint { color: #858e9f; font-size: 12px; line-height: 1.5; margin: 11px 0 25px; }
+    .primary-btn, .secondary-btn { min-height: 48px; border-radius: 12px; border: 0; font-weight: 800; display: inline-flex; gap: 10px; align-items: center; justify-content: center; transition: transform .15s, background .15s, opacity .15s; }
+    .primary-btn { width: 100%; padding: 0 18px; background: var(--accent); color: var(--accent-text); }
+    .primary-btn:hover { background: #c8ff8d; transform: translateY(-1px); }
+    .primary-btn:disabled, .secondary-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .secondary-btn { padding: 0 15px; background: #2b303b; color: var(--text); border: 1px solid #3a414f; font-size: 13px; }
+    .secondary-btn:hover:not(:disabled) { background: #353c48; }
+    .tiny-privacy { display: flex; gap: 9px; align-items: flex-start; padding-top: 22px; color: #818b9a; font-size: 11px; line-height: 1.5; }
+    .tiny-privacy svg { flex: 0 0 auto; margin-top: 1px; }
+    .result-panel { display: flex; flex-direction: column; }
+    .result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .result-title { margin: 0; font-size: 20px; letter-spacing: -.04em; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #3b4930; background: #253020; color: var(--accent); border-radius: 99px; padding: 7px 10px; white-space: nowrap; font-size: 10px; font-weight: 800; }
+    .status-pill .top-dot { width: 5px; height: 5px; }
+    .image-frame { position: relative; overflow: hidden; min-height: 300px; flex: 1; display: grid; place-items: center; border-radius: 14px; background: #11141a; border: 1px solid #2e3440; }
+    .image-frame img { width: 100%; height: 100%; min-height: 300px; max-height: 445px; object-fit: contain; display: block; background: #11141a; }
+    .empty-state { max-width: 290px; padding: 28px; text-align: center; color: var(--muted); }
+    .empty-art { width: 104px; height: 104px; margin: 0 auto 20px; border-radius: 28px; border: 1px solid #343b47; background: linear-gradient(140deg, #303b35, #262b37); display: grid; place-items: center; }
+    .empty-art svg { width: 53px; height: 53px; color: var(--accent); }
+    .empty-state strong { display: block; color: var(--text); margin-bottom: 8px; font-size: 14px; }
+    .empty-state p { margin: 0; font-size: 12px; line-height: 1.65; }
+    .image-error { display: none; padding: 22px; text-align: center; color: var(--warning); font-size: 13px; line-height: 1.6; }
+    .image-error a { color: var(--accent); }
+    .result-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 15px; min-height: 37px; }
+    .image-caption { min-width: 0; }
+    .meta-title { font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 330px; }
+    .meta-url { color: #818a9a; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 330px; margin-top: 4px; }
+    .result-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+    .icon-btn { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; border: 1px solid #3a414f; background: #242934; color: var(--text); }
+    .icon-btn:hover { background: #303745; }
+    .notice { display: none; border: 1px solid #524333; background: #30271f; color: var(--warning); padding: 12px 14px; border-radius: 12px; margin-top: 16px; font-size: 12px; line-height: 1.5; }
+    .notice.visible { display: block; }
+    .notice.error { border-color: #633b42; background: #321f25; color: #ffabb3; }
+    .notice a { color: inherit; }
+    footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; color: #6f7888; font-size: 11px; margin-top: 26px; }
+    .footer-right { display: flex; align-items: center; gap: 7px; }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 24px, 560px); padding-top: 19px; }
+      header { margin-bottom: 44px; }
+      .workspace { grid-template-columns: 1fr; }
+      .panel { padding: 20px; }
+      .image-frame { min-height: 250px; }
+      .image-frame img { min-height: 250px; max-height: 390px; }
+      .result-meta { align-items: flex-start; }
+      .meta-title, .meta-url { max-width: 205px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+        <span>Random Photo Finder</span>
+      </div>
+      <div class="top-note"><span class="top-dot"></span> One click. A new discovery.</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow"><span>✳</span> The web, shuffled</div>
+      <h1>Find a photo.<br><span>Anywhere online.</span></h1>
+      <p class="intro">Drop in a website address and get a random image from that page. Keep exploring with a fresh pick every time.</p>
+    </section>
+
+    <section class="workspace" aria-label="Random photo finder">
+      <div class="panel">
+        <div class="section-label"><span>Choose your website</span><span class="step">01 / 02</span></div>
+        <form id="finder-form">
+          <label for="site-url">Website URL</label>
+          <div class="input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+            <input id="site-url" type="text" inputmode="url" placeholder="https://example.com/gallery" autocomplete="url" required>
+          </div>
+          <p class="hint">Checks responsive and lazy-loaded images, metadata, CSS backgrounds, and up to 10 same-site pages. Found image lists are reused for 15 minutes so changing photos is much faster.</p>
+          <button class="primary-btn" id="find-btn" type="submit"><span>Find a random photo</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </form>
+        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+        <div class="tiny-privacy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Only public pages are scanned. Some websites block automated access, and private or local-network addresses are rejected.</span></div>
+      </div>
+
+      <div class="panel result-panel">
+        <div class="section-label"><span>Your random find</span><span class="step">02 / 02</span></div>
+        <div class="result-head">
+          <h2 class="result-title" id="result-title">A little visual surprise</h2>
+          <span class="status-pill" id="status-pill"><span class="top-dot"></span> READY TO EXPLORE</span>
+        </div>
+        <div class="image-frame" id="image-frame">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-art"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="8" width="34" height="32" rx="6"/><circle cx="18" cy="19" r="3"/><path d="m9 35 11-11 7 7 5-5 7 7"/><path d="M31 8v-3M24 8V4M38 8V5" stroke-linecap="round"/></svg></div>
+            <strong>Your next favourite image is out there.</strong>
+            <p>Enter a website on the left and let chance pick the picture.</p>
+          </div>
+          <img id="result-image" alt="Random image from the selected website" hidden>
+          <div class="image-error" id="image-error">The image was found, but this site may block displaying it here. <a id="open-image" href="#" target="_blank" rel="noopener noreferrer">Open the image directly ↗</a></div>
+        </div>
+        <div class="result-meta">
+          <div class="image-caption">
+            <div class="meta-title" id="image-caption">No image selected yet</div>
+            <div class="meta-url" id="image-url">Your result will appear here</div>
+          </div>
+          <div class="result-actions">
+            <button class="icon-btn" id="open-btn" type="button" title="Open image in new tab" aria-label="Open image in new tab" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg></button>
+            <button class="secondary-btn" id="another-btn" type="button" disabled><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.4-3"/></svg> Another photo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer><span>Made for curious clicks.</span><span class="footer-right"><span class="top-dot"></span> No account needed</span></footer>
+  </main>
+  <script>
+    const form = document.getElementById('finder-form');
+    const urlInput = document.getElementById('site-url');
+    const findBtn = document.getElementById('find-btn');
+    const anotherBtn = document.getElementById('another-btn');
+    const openBtn = document.getElementById('open-btn');
+    const notice = document.getElementById('notice');
+    const resultTitle = document.getElementById('result-title');
+    const statusPill = document.getElementById('status-pill');
+    const resultImage = document.getElementById('result-image');
+    const emptyState = document.getElementById('empty-state');
+    const imageError = document.getElementById('image-error');
+    const openImage = document.getElementById('open-image');
+    const imageCaption = document.getElementById('image-caption');
+    const imageUrl = document.getElementById('image-url');
+    let activeImageUrl = '';
+    let seenImages = [];
+
+    function showNotice(message, isError = false) {
+      notice.textContent = message;
+      notice.className = `notice visible${isError ? ' error' : ''}`;
+    }
+    function hideNotice() { notice.className = 'notice'; notice.textContent = ''; }
+    function setLoading(loading, quickPick = false) {
+      findBtn.disabled = loading;
+      anotherBtn.disabled = loading || !activeImageUrl;
+      findBtn.innerHTML = loading
+        ? `<span>${quickPick ? 'Picking from saved photos…' : 'Scanning page and linked galleries…'}</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9" stroke-linecap="round"/></svg>`
+        : '<span>Find a random photo</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    }
+    function setImage(url, alt) {
+      activeImageUrl = url;
+      resultImage.hidden = false;
+      emptyState.hidden = true;
+      imageError.style.display = 'none';
+      resultImage.alt = alt || 'Random image from website';
+      resultImage.onload = () => { resultImage.style.display = 'block'; imageError.style.display = 'none'; };
+      resultImage.onerror = () => { resultImage.style.display = 'none'; imageError.style.display = 'block'; };
+      resultImage.src = url;
+      openImage.href = url;
+      openBtn.disabled = false;
+      anotherBtn.disabled = false;
+      imageCaption.textContent = alt || 'Random photo';
+      imageUrl.textContent = url;
+      statusPill.innerHTML = '<span class="top-dot"></span> IMAGE FOUND';
+      resultTitle.textContent = 'A new visual find';
+    }
+    async function scan(excludeCurrent = false) {
+      const url = urlInput.value.trim();
+      if (!url) { showNotice('Enter a website URL first.', true); urlInput.focus(); return; }
+      hideNotice();
+      setLoading(true, excludeCurrent);
+      try {
+        const response = await fetch('/api/random-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, exclude: excludeCurrent ? [...new Set([...seenImages, activeImageUrl].filter(Boolean))] : [] })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Could not scan this website.');
+        if (data.image && data.image.url) {
+          if (activeImageUrl) seenImages.push(activeImageUrl);
+          if (seenImages.length > 100) seenImages = seenImages.slice(-100);
+          setImage(data.image.url, data.image.alt);
+          const count = data.image_count;
+          const pagesScanned = Number(data.pages_scanned || 1);
+          const hostname = new URL(data.site).hostname;
+          if (data.cache_hit) {
+            showNotice(`Fast pick from saved results for ${hostname}: ${count} possible images across ${pagesScanned} page${pagesScanned === 1 ? '' : 's'}. The website was not rescanned.`);
+          } else {
+            showNotice(`Scanned ${hostname}, checked ${pagesScanned} page${pagesScanned === 1 ? '' : 's'}, and found ${count} possible image${count === 1 ? '' : 's'}. ${count > 1 && seenImages.length >= count ? 'You can repeat the picks after exploring them all.' : ''}`);
+          }
+        } else {
+          throw new Error('No usable photos were found on that page.');
+        }
+      } catch (error) {
+        showNotice(error.message || 'Something went wrong. Try another website.', true);
+      } finally {
+        setLoading(false);
+      }
+    }
+    form.addEventListener('submit', (event) => { event.preventDefault(); seenImages = []; scan(false); });
+    anotherBtn.addEventListener('click', () => scan(true));
+    openBtn.addEventListener('click', () => { if (activeImageUrl) window.open(activeImageUrl, '_blank', 'noopener,noreferrer'); });
+    resultImage.addEventListener('load', () => { imageError.style.display = 'none'; });
+  </script>
+</body>
+</html>
